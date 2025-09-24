@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>相談結果</title>
+    <style>
+        body {
+            background-image: url('/static/calming_landscape.png');
+            background-size: cover; /* 画像をカバーする */
+            color: #333; /* テキストの色を白に設定 */
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        #conversation-history {
+            margin: 20px auto;
+            max-width: 600px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>相談の履歴</h1>
+    <div id="conversation-history">
+        {% for entry in conversation %}
+            {% if entry.role == 'user' %}
+                <p><strong>ユーザー:</strong> {{ entry.content }}</p>
+            {% elif entry.role == 'assistant' %}
+                <p><strong>AI:</strong> {{ entry.content }}</p>
+                <!-- 各AIの回答ごとに再生と停止ボタン -->
+                <button onclick="playAudio('{{ entry.audio_path }}')">再生</button>
+                <button onclick="stopAudio()">停止</button>
+            {% endif %}
+            <hr>
+        {% endfor %}
+    </div>
+
+    <!-- 追加質問を音声で行うボタン -->
+    <button onclick="startFollowup()">音声で追加の質問をする</button>
+
+    <script>
+        let audio = null;
+
+        function playAudio(audioPath) {
+            if (audio) {
+                audio.pause();
+            }
+            audio = new Audio("/audio/" + audioPath);
+            audio.play();
+        }
+
+        function stopAudio() {
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;  // 再生位置をリセット
+            }
+        }
+
+        function startFollowup() {
+            fetch('/followup', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const conversationHistory = document.getElementById("conversation-history");
+                    
+                    const userEntry = document.createElement("p");
+                    userEntry.innerHTML = "<strong>ユーザー:</strong> " + data.user_text;
+                    conversationHistory.appendChild(userEntry);
+
+                    const aiEntry = document.createElement("p");
+                    aiEntry.innerHTML = "<strong>AI:</strong> " + data.ai_response;
+                    conversationHistory.appendChild(aiEntry);
+
+                    const playButton = document.createElement("button");
+                    playButton.innerText = "再生";
+                    playButton.onclick = function() { playAudio(data.audio_path); };
+                    conversationHistory.appendChild(playButton);
+
+                    const stopButton = document.createElement("button");
+                    stopButton.innerText = "停止";
+                    stopButton.onclick = stopAudio;
+                    conversationHistory.appendChild(stopButton);
+
+                    const divider = document.createElement("hr");
+                    conversationHistory.appendChild(divider);
+                })
+                .catch(error => console.error('エラー:', error));
+        }
+    </script>
+    
+    <a href="/">ホームに戻る</a>
+</body>
+</html>

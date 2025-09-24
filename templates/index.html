@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeCompass - 音声対話</title>
+    <style>
+        body {
+            background-image: url('/static/calming_landscape.png');
+            background-size: cover; /* 画像をカバーする */
+            color: #333; /* テキストの色を白に設定 */
+            font-family: Arial, sans-serif; /* フォントの設定 */
+        }
+
+        h1 {
+            color: #fff; /* ヘッダーの色を白に */
+            text-align: center;
+            margin-top: 50px; /* 上部の余白 */
+        }
+
+
+        #catchphrase {
+            text-align: center;
+            font-size: 1.8em;
+            margin-top: 20px;
+            margin-top: 50px; /* 上部の余白 */
+            margin-bottom: 50px;
+        }
+
+        #intro {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.5; /* 行間を広げて読みやすく */
+        }
+
+
+        #timer {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #333; /* タイマーの色を白に */
+            text-align: center;
+        }
+
+        #startForm {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>LifeCompass 音声対話</h1>
+    
+    <div id="catchphrase">「あなたの心の声を、私たちが丁寧に聴きます。」</div>
+    <div id="intro">
+        LifeCompass は、日々のストレスや不安を軽くするために寄り添う、あなた専用のオンライン相談室です。<br>
+        話しやすいインターフェースと共に、思いを言葉にしながら、心を整えるお手伝いをいたします。<br>
+        どんな小さな悩みでも、どうぞ安心してお話しください。
+    </div>
+
+    <!-- タイマー表示 -->
+    <div id="timer">録音準備完了</div>
+
+    <!-- 録音開始ボタン -->
+    <form id="startForm" action="/start_conversation" method="POST" onsubmit="startTimer()">
+        <button type="submit">音声で相談を始める</button>
+    </form>
+
+    <script>
+        const RECORD_DURATION = 30; // 録音時間（秒）
+
+        function startTimer() {
+            let remainingTime = RECORD_DURATION;
+            const timerElement = document.getElementById("timer");
+
+            // タイマーの更新
+            const intervalId = setInterval(() => {
+                if (remainingTime > 0) {
+                    timerElement.textContent = `残り ${remainingTime} 秒`;
+                    remainingTime--;
+                } else {
+                    timerElement.textContent = "録音完了";
+                    clearInterval(intervalId);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
